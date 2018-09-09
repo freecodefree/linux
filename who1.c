@@ -22,3 +22,16 @@ int main(){
 	close(utmpFd);
 	return 0;
 }
+
+void showInfo(struct utmp *utbufp){
+	printf("%-8.8s",utbufp->ut_name);
+        printf(" ");
+        printf("%-8.8s"utbufp->ut_line);
+        printf(" ");
+        printf("%10ld",utbufp->ut_time);
+        printf(" ");
+#ifdef SHOWHOST
+        printf("(%s)",utbufp->ut_host);
+#endif
+	printf("\n");
+}
