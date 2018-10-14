@@ -44,17 +44,36 @@ int ttyMode(int how){
 	return 0;
 }
 
+int rotate(){
+	int c;
+	while(1){
+	if((c=getchar())=='q'){
+		return 0;
+//		ttyMode(1);
+//		exit(0);
+//	}else if(c=='\b'){
+//		putchar('\b');
+//		putchar(' ');
+//		putchar('\b');
+//		printf("%c%c%c",'\b',' ','\b');
+	}else{
+		putchar(++c);
+	}
+	}
+	return 0;
+}
+
 int main(){
 	ttyMode(0);
 	signal(SIGINT,ctrlCQHandler);
 	signal(SIGQUIT,ctrlCQHandler);
-	sleep(3);
-	BEEP;
-	fflush(stdout);
+//	sleep(3);
+//	BEEP;
+//	fflush(stdout);
 //	BEEP;
 	setCrNoechoMode();
-	sleep(3);
-//	rotate();
+//	sleep(3);
+	rotate();
 	ttyMode(1);
 	return 0;
 }
