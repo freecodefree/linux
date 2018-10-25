@@ -8,6 +8,8 @@ int main(){
 	addstr("hello worle");
 	move(LINES-1,1);
 	refresh();
+	getch();
 	endwin();
+	
 }
 // initscr,clear, move,addstr,refresh,endwin
