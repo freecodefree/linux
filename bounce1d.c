@@ -23,12 +23,12 @@ int main(){
 	row=10;
 	col=2;
 	dir=1;
-	speed=1;
-	delay=1000;
+	speed=5;
+	delay=300;
 	move(row,col);
 	addstr(MESSAGE);
 	refresh();
-	setTicker(delay);
+	setTicker(delay*speed);
 	while(1){
 		c=getchar();
 		if(c=='q'){
@@ -37,18 +37,18 @@ int main(){
 		if(c==' '){
 			dir*=-1;
 		}
-		if(c=='s'){		
+		if(c=='f'){		
 			speed--;
-			if(speed<0){
-				speed=0;
+			if(speed<1){
+				speed=1;
 			}
 			ndelay=delay*speed;
 			setTicker(ndelay);
 		}
-	        if(c=='f'){
+	        if(c=='s'){
                         speed++;
-                        if(speed>6){
-                                speed=6;
+                        if(speed>9){
+                                speed=9;
                         }
 			ndelay=delay*speed;
 			setTicker(ndelay);
@@ -59,11 +59,12 @@ int main(){
 }
 
 void moveMsg(int s){
+//	signal(SIGALRM,moveMsg);
 	move(row,col);
 	addstr(BLANK);
 //	col+=speed*dir;
 	col+=dir;
-	if(col>(COLS-strlen(BLANK))||col<1){
+	if(col>=(COLS-strlen(BLANK))||col<1){
 		dir*=-1;
 	}
 	move(row,col);
