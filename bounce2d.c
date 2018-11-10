@@ -39,7 +39,7 @@ void setUp(){
 	crmode();
 //	signal(SIGINT,SIG_IGN);
 	signal(SIGALRM,moveBall);
-	setTicker(TICKS_PER_SEC/50);	
+	setTicker(1000/TICKS_PER_SEC);	
 //	mvaddch(ball.yPos,ball.xPos,ball.symbols);
 //	move(LINS,COLS);
 
@@ -67,24 +67,27 @@ int setTicker(int nMSecs){
 void moveBall(int s){
 	int yCur,xCur,moved;
 	signal(SIGALRM,SIG_IGN);
+	xCur=ball.xPos;
+	yCur=ball.yPos;
 	moved=0;
 
 	if(ball.xTtm>0&&ball.xTtg--==1){
 		ball.xTtg=ball.xTtm;
-		xCur=ball.xPos;
+//		xCur=ball.xPos;
 		ball.xPos+=ball.xDir;
 		moved=1;
 	}
 	if(ball.yTtm>0&&ball.yTtg--==1){
                 ball.yTtg=ball.yTtm;
-                yCur=ball.yPos;
+//              yCur=ball.yPos;
                 ball.yPos+=ball.yDir;
                 moved=1;
         }
 	if(moved){
 		mvaddch(yCur,xCur,BLANK);
 		mvaddch(ball.yPos,ball.xPos,ball.symbol);
-		move(LINES,COLS);
+		move(0,0);
+//		move(LINES-1,COLS-1);
 		refresh();
 		bounceOrLose(&ball);
 	}
