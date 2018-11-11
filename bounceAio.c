@@ -5,6 +5,7 @@
 #include "unistd.h"
 #include "stdio.h"
 #include "sys/time.h"
+#include "aio.h"
 //#include "bounce1d.c"
 
 struct ppball ball;
@@ -15,12 +16,17 @@ int bounceOrLose(struct ppball *);
 int setTicker(int);
 void onInput(int);
 int done=0;
-void enableKDBSignals();
+//void enableKDBSignals();
+void setupAioBuffer();
+
+struct aiocb kbcbuf;
 
 int main(){
 	int c;
 	setUp();
 	signal(SIGIO,onInput);
+	setupAioBuffer();
+	aio_read(&kbcbuf);
 //	enableKDBSignals();
 	while(!done)pause();
 /*	while(!done){
@@ -34,6 +40,21 @@ int main(){
 	wrapUp();
 }
 
+// aio_error,aio_return,
+void setupAioBuffer(){
+	static char input[1];
+
+	kbcbuf.aio_fildes=0;
+	kbcbuf.aio_buf=input;
+	kbcbuf.aio_nbytes=1;
+	kbcbuf.aio_offset=0;
+
+	kbcbuf.aio_sigevent.sigev_notify=SIGEV_SIGNAL;
+	kbcbuf.aio_sigevent.sigev_signo=SIGIO;
+}
+// aiocb,kbcbuf,setupAioBuffer,aioRead,input,aio_fildes,aio_buf
+// aio_nbytes,aio_offset,aio_sigevent,sigev_notify,sigev_signo
+// SIGEV_SIGNAL,SIGIO
 void onInput(int s){
 	int c=getch();
 	if(c=='q'){
