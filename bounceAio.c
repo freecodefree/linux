@@ -29,14 +29,15 @@ int main(){
 	aio_read(&kbcbuf);
 //	enableKDBSignals();
 	while(!done)pause();
-/*	while(!done){
+	while(!done){
+		c=getchar();
 		switch (c){
 			case 'f':ball.xTtm--;break;
 			case 'g':ball.yTtm--;break;
 			case 's':ball.xTtm++;break;
 			case 'd':ball.yTtm++;break;
 		}
-	}*/
+	}
 	wrapUp();
 }
 
@@ -59,8 +60,9 @@ void onInput(int s){
 	if(aio_error(&kbcbuf)!=0){
 		perror("aio read");
 	}else if(aio_return(&kbcbuf)==1){
-		char c=input[0];
-		if(c=='q'){
+		char *cp=(char *)kbcbuf.aio_buf;
+		char c=*cp;
+		if(c=='q'||c==EOF){
 			done =1;
 		}
 	}
@@ -71,7 +73,7 @@ void enableKDBSignals(){
 	int fdFlags;
 	fcntl(0,F_SETOWN,getpid());
 	fdFlags=fcntl(0,F_GETFL);
-	fcntl(0,F_SETFL,(fdFlags|O_ASYNC));
+//	fcntl(0,F_SETFL,(fdFlags|O_ASYNC));
 }
 // fdFlags,F_SETOWN,getpid,F_GETFL,F_SETFL,O_ASYNC
 void setUp(){
