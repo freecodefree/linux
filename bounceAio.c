@@ -56,10 +56,15 @@ void setupAioBuffer(){
 // aio_nbytes,aio_offset,aio_sigevent,sigev_notify,sigev_signo
 // SIGEV_SIGNAL,SIGIO
 void onInput(int s){
-	int c=getch();
-	if(c=='q'){
-		done =1;
+	if(aio_error(&kbcbuf)!=0){
+		perror("aio read");
+	}else if(aio_return(&kbcbuf)==1){
+		char c=input[0];
+		if(c=='q'){
+			done =1;
+		}
 	}
+	aio_read(&kbcbuf);
 }
 
 void enableKDBSignals(){
