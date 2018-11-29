@@ -5,6 +5,9 @@
 #define MAXARGS 20
 #define ARGLEN 100
 
+int execute(char **);
+char *makestring(char *);
+
 int main(){
 	char *arglist[MAXARGS+1];
 	int numargs=0;
@@ -25,4 +28,23 @@ int main(){
 	return 0;
 
 }
+int execute(char *arglist[]){
+	execvp(arglist[0],arglist);
+	perror("execvp:");
+	return 1;
+}
+
+char *makestring(char *buf){
+	char *cp;
+	buf[strlen(buf)-1]='\0';
+	if((cp=malloc(strlen(buf)+1))==NULL){
+		printf("error:malloc\n");
+		exit (1);
+	}
+	strcpy(cp,buf);
+	return cp;
+}
+
+
+// execvp,cp,malloc,buf,strcpy
 // arglist,numargs,argbuf,makestring,numargs,execute
