@@ -24,4 +24,26 @@ int main(){
 	}
 	return 0;
 }
+
+int execute(char *arglist[]){
+	int pid,exitstatus;
+	pid=fork();
+
+	switch(pid){
+		case '-1':
+			perror("fork");
+			return -1;
+		case '0':
+			execvp(arglist[0],arglist);
+			perror("child");
+			return -1
+		default:
+			while(wait(&exitstatus)!=pid);
+			printf("child exit with status:%d,%d\n",
+					exitstatus>>8,exitstatus&0377);
+	}
+	return 0;
+
+}
+// pid,exitstatus,fork,execvp,wait,>>8,0377
 // arglist,numargs,argbuf,makestring,fgets,execute
