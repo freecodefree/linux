@@ -45,5 +45,17 @@ int execute(char *arglist[]){
 	return 0;
 
 }
+char *makestring(char *buf){
+	char *cp,buf;
+	buf[strlen(buf)-1]='\0';
+	cp=malloc(strlen(buf)+1);
+	if(cp==NULL){
+		perror("malloc");
+		return NULL;
+	}
+	strcpy(cp,buf);
+	return cp;
+}
+// buf,cp,malloc,strlen,strcpy,
 // pid,exitstatus,fork,execvp,wait,>>8,0377
 // arglist,numargs,argbuf,makestring,fgets,execute
