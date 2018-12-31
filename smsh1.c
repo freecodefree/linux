@@ -4,10 +4,12 @@
 #include "signal.h"
 #include "sys/wait.h"
 #include "smsh.h"
+#include "string.h"
 
 #define DFL_PROMPT "> "
 int setup(void);
 int execute(char *argv[]);
+char *next_cmd(char *,FILE *);
 int main(int ac,char **av){
 	char *cmdline,*prompt,**arglist;
 	int result;
@@ -57,6 +59,35 @@ int execute(char *argv[]){
 	}
 }
 
+char *next_cmd(char *prompt,FILE *fp){
+	char *buf;
+	int bufspace=0,pos=0;
+	char c;
+
+	printf("%s",prompt);
+
+	while((c=getc(fp))!=EOF){
+		if(pos+1>=bufspace){
+			if(bufspace==0){
+				buf=emalloc(BUFSIZ);
+			}else{
+				buf=erealloc(buf,bufspace+BUFSIZ);
+				bufspace+=BUFSIZ;
+			}
+		}
+
+		if(c=='\n')break;
+		buf[pos++]=c;
+	}
+
+	if(pos=0&&c==EOF){
+		return NULL;
+	}else{
+		buf[pos]='\0';
+	}
+	return buf;
+}
+// nextCmd,buf,bufspace,pos,prompt,FILE,getc,BUFSIZ,emalloc,erealloc
 // pid,childInfo,fork,SIG_DFL,execvp,wait
 // signal,SIG_IGN,SIGINT,SIGQUIT
 // cmdline,prompt,arglist,result,setup,next_cmd,splitline,execute,freelist
