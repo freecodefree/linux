@@ -10,6 +10,8 @@
 int setup(void);
 int execute(char *argv[]);
 char *next_cmd(char *,FILE *);
+char **splitline(char *);
+
 int main(int ac,char **av){
 	char *cmdline,*prompt,**arglist;
 	int result;
@@ -87,6 +89,40 @@ char *next_cmd(char *prompt,FILE *fp){
 	}
 	return buf;
 }
+
+char **splitline(char *line){
+	char *cp,*start,*newstr(),**args;
+	int bufspace=0,spots=0,argnum=0,len=0;
+
+	if(line==NULL){
+		return NULL;
+	}
+	cp=line;
+
+	while(*cp!='\0'){
+		if(is_delim(*cp++))continue;
+		if(argnum+1>=spots){
+			if(spots==0){
+				args=emalloc(BUFSIZ);
+				bufspace=BUFSIZ;
+				spots=bufspace/sizeof(char *);
+			}
+			args=erealloc(args,BUFSIZ+bufspace);
+			bufspace+=BUFSIZ;
+			spots+=(BUFSIZ/sizeof(char *));
+		}
+		start=cp;
+		len=1;
+		while(*cp++!='\0'&&!(is_delim(*cp))){
+			len++;
+		}
+		*args[argnum++]=newstr(start,len);
+	}
+	*args[argnum]=NULL;
+	return args;
+}
+// line,newstr,args,spots,bufspace,argnum,cp,start,len,emalloc,sizeof
+// is_delim,erealloc,start
 // nextCmd,buf,bufspace,pos,prompt,FILE,getc,BUFSIZ,emalloc,erealloc
 // pid,childInfo,fork,SIG_DFL,execvp,wait
 // signal,SIG_IGN,SIGINT,SIGQUIT
