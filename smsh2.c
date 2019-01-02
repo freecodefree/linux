@@ -5,6 +5,17 @@
 #include "sys/wait.h"
 #include "smsh.h"
 
+enum states {NEUTRAL,WANT_THEN,THEN_BLOCK};
+enum results {SUCCESS,FAIL};
+
+static int if_state=NEUTRAL;
+static int if_result=SUCCESS;
+static int last_stat=0;
+
+int syn_err(char *);
+
+
+
 #define DFL_PROMPT "> "
 void setup();
 void fatal();
@@ -49,6 +60,19 @@ int process(char **args){
 		rv=do_control_command(args);
 	}else if(ok_to_execute()){
 		rv=execute(args);
+	}
+	return rv;
+}
+
+int ok_to_execute(){
+	int rv=1;
+	if(if_state==WANT_THEN){
+		syn_err("expect then block\n");
+		rv=0;
+	}else if(if_state==THEN_BLOCK&&if_result==SUCCESS){
+		rv=1;
+	}else(if_state==THEN_BLOCK&&if_result==FAIL){
+		rv=0;
 	}
 	return rv;
 }
