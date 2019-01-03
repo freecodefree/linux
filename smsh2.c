@@ -4,6 +4,7 @@
 #include "signal.h"
 #include "sys/wait.h"
 #include "smsh.h"
+#include "string.h"
 
 enum states {NEUTRAL,WANT_THEN,THEN_BLOCK};
 enum results {SUCCESS,FAIL};
@@ -76,5 +77,43 @@ int ok_to_execute(){
 	}
 	return rv;
 }
-// 
+
+int is_control_command(char *s){
+	return (strcmp(s,"if")==0||strcmp(s,"then")==0||strcmp(s,"fi")==0);
+}
+
+int do_control_command(char **args){
+	char *cmd=*args;
+	int rv=-1;
+
+	if(strcmp(cmd,"if")==0){
+		if(if_state!=NEUTRAL){
+			rv=syn_err("unexpected if");
+		}else{
+			last_stat=process(args+1);
+			if_result=(last_stat==0?SUCCESS:FAIL);
+			if_state=WANT_THEN;
+			rv=0;
+		}
+	}else if(strcmp(cmd,"then")==0){
+		if(if_state!=WANT_THEN){
+			rv=syn_err("unexpected then");
+		}else{
+			if_state=THEN_BLOCK;
+			rv=0;
+		}
+	}else if(strcmp(cmd,"fi")==0){
+		if(if_state!=THEN_BLOCK){
+			rv=syn_err("unexpected fi");
+		}else{
+			if_state=NEUTRAL;
+			rv=0;
+		}
+	}else{
+		fatal("internal error processing:",cmd,2);
+	}
+
+	return rv;
+}
+// cmd,if_state,NEUTRAL,syn_err,last_stat,if_result,WANT_THEN,
 // cmdline,prompt,arglist,result,process,setup,nextCmd,splitline,freelist,free
