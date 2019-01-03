@@ -115,5 +115,11 @@ int do_control_command(char **args){
 
 	return rv;
 }
+
+int syn_err(char *msg){
+	if_state=NEUTRAL;
+	fprintf(stderr,"syntax error:%s\n",msg);
+	return -1;
+}
 // cmd,if_state,NEUTRAL,syn_err,last_stat,if_result,WANT_THEN,
 // cmdline,prompt,arglist,result,process,setup,nextCmd,splitline,freelist,free
