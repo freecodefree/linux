@@ -131,7 +131,7 @@ int builtin_command(char **args,int *resultp){
 		VLlist();
 		*resultp=0;
 		rv=1;
-	}else if(strchr(args[0],"=")!=NULL){
+	}else if(strchr(args[0],'=')!=NULL){
 		*resultp=assign(args[0]);
 		if(*resultp!=-1)
 			rv=1;		
@@ -145,6 +145,23 @@ int builtin_command(char **args,int *resultp){
 	}
 	return rv;
 }
+int assign(char *str){
+	int rv=0;
+	char *cp;
+	cp=strchr(str,'=');
+	*cp='\0';
+	rv=(okname(str)?VLstore(str,cp+1):-1);
+	cp='=';
+	return rv;
+}
+int okname(char *str){
+	char *cp;
+	for(cp=str;*cp;cp++){
+		if((isdigit(cp)&&(cp==str))||(!isalnum(cp)&&cp!='_'))return 0;
+	}
+	return (cp!=str);
+}
+// str,cp,strchr,VLstore,isalnum
 // VLlist,resultp,strchr,assign,VLexport,okname
 // cmd,if_state,NEUTRAL,syn_err,last_stat,if_result,WANT_THEN,
 // cmdline,prompt,arglist,result,process,setup,nextCmd,splitline,freelist,free
