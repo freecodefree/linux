@@ -5,6 +5,7 @@
 #include "sys/wait.h"
 #include "smsh.h"
 #include "string.h"
+#include "ctype.h"
 
 enum states {NEUTRAL,WANT_THEN,THEN_BLOCK};
 enum results {SUCCESS,FAIL};
@@ -60,6 +61,7 @@ int process(char **args){
 	}else if(is_control_command(args[0])){
 		rv=do_control_command(args);
 	}else if(ok_to_execute()){
+		if(!builtin_command(args,&rv))
 		rv=execute(args);
 	}
 	return rv;
@@ -121,5 +123,28 @@ int syn_err(char *msg){
 	fprintf(stderr,"syntax error:%s\n",msg);
 	return -1;
 }
+
+int builtin_command(char **args,int *resultp){
+	int rv=0;
+
+	if(strcmp(*args,"set")==0){
+		VLlist();
+		*resultp=0;
+		rv=1;
+	}else if(strchr(args[0],"=")!=NULL){
+		*resultp=assign(args[0]);
+		if(*resultp!=-1)
+			rv=1;		
+	}else if(strcmp(*args,"export")==0){
+		if(args[1]!=NULL&&okname(args[1])){
+			*resultp=VLexport(args[1]);
+		}else{
+			*resultp=1;
+		}
+		rv=1;
+	}
+	return rv;
+}
+// VLlist,resultp,strchr,assign,VLexport,okname
 // cmd,if_state,NEUTRAL,syn_err,last_stat,if_result,WANT_THEN,
 // cmdline,prompt,arglist,result,process,setup,nextCmd,splitline,freelist,free
