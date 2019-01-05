@@ -45,6 +45,8 @@ int main(){
 }
 
 void setup(){
+	extern char **environ;
+	VLenviron2table(environ);
 	signal(SIGINT,SIG_IGN);
 	signal(SIGQUIT,SIG_IGN);
 }
@@ -161,6 +163,32 @@ int okname(char *str){
 	}
 	return (cp!=str);
 }
+
+int execute(char **args){
+	int pid,child=-1;
+	if(args[0]==NULL){
+		return 0;
+	}
+
+	if((pid=fork())==-1){
+		perror("fork");
+	}else if(pid==0){
+		environ=VLtable2environ();
+		signal(SIGINT,SIG_DFL);
+		signal(SIGQUIT,SIG_DFL);
+		execvp(args[0],args);
+		perror("cannot execute command");
+		exit(1);
+	}else{
+		if(wait(&child)==-1){
+			perror("wait");
+		}
+//		return child;
+	}
+	return child;
+
+}
+// VLtable2environ,execvp 
 // str,cp,strchr,VLstore,isalnum
 // VLlist,resultp,strchr,assign,VLexport,okname
 // cmd,if_state,NEUTRAL,syn_err,last_stat,if_result,WANT_THEN,
