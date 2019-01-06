@@ -219,6 +219,14 @@ char *new_string(char *name,char *val){
 	}
 	return rv;
 }
+char *VLlookup(char *name){
+	struct var *itemp;
+	if((itemp=find_item(name,0))!=NULL){
+		return (itemp->str+1+strlen(name));
+	}
+	return "";
+}
+// VLlookup,find_item,
 // VLstore,name,val,itemp,
 // VLtable2environ,execvp 
 // str,cp,strchr,VLstore,isalnum
