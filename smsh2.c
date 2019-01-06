@@ -7,6 +7,7 @@
 #include "string.h"
 #include "ctype.h"
 
+
 enum states {NEUTRAL,WANT_THEN,THEN_BLOCK};
 enum results {SUCCESS,FAIL};
 
@@ -17,8 +18,15 @@ static int last_stat=0;
 int syn_err(char *);
 
 
-
+#define MAXVARS 200
 #define DFL_PROMPT "> "
+struct var{
+	char *str;
+	int global;
+};
+static struct var tab[MAXVARS];
+static struct var *find_item(char *,int);
+static char *new_string(char *,char *);
 void setup();
 void fatal();
 int is_control_command(char *);
@@ -188,6 +196,30 @@ int execute(char **args){
 	return child;
 
 }
+int VLstore(char *name,int val){
+	int rv=-1;
+	char *s;
+	struct var *itemp;
+
+	if((itemp=find_item(name,1))!=NULL&&(s=new_string(name,val))!=NULL){
+		if(itemp->str!=NULL){
+			free(itemp->str);
+		}
+		itemp->str=s;
+		rv=0;
+	}
+	return rv;
+}
+
+char *new_string(char *name,char *val){
+	char *rv;
+	rv=malloc(strlen(name)+2+strlen(val));
+	if(rv!=NULL){
+		sprintf(rv,"%s=%s",name,val);
+	}
+	return rv;
+}
+// VLstore,name,val,itemp,
 // VLtable2environ,execvp 
 // str,cp,strchr,VLstore,isalnum
 // VLlist,resultp,strchr,assign,VLexport,okname
