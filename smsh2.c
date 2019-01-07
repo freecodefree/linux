@@ -254,6 +254,58 @@ static struct var *find_item(char *name,int first_blank){
 	}
 	return NULL;
 }
+void VLlist(){
+	for(int i=0;i<MAXVARS&&tab[i].str!=NULL;i++){
+		if(tab[i].global==1){
+			printf("* %s\n",tab[i].str);
+		}else{
+			printf("  %s\n",tab[i].str);
+		}
+	}
+}
+
+int VLenviron2table(char *env[]){
+	int i;
+	for(i=0;env[i]!=NULL;i++){
+		if(i==MAXVARS){
+			return 0;
+		}
+		char *newstring;
+		newstring=malloc(strlen(env[i])+1);
+		if(newstring==NULL){
+			return 0;
+		}
+		strcpy(newstring,env[i]);
+		tab[i].str=newstring;
+		tab[i].global=1;
+	}
+	while(i<MAXVARS){
+		tab[i].str=NULL;
+		tab[i++].global=0;
+	}
+	return 1;
+}
+
+char **VLtable2environ(){
+	int n=0,j=0;
+	char **envtab;
+	for(int i=0;tab[i].str!=NULL;i++){
+		if(tab[i].global==1){
+			n++;
+		}
+	}
+	envtab=(char **)malloc((1+n)*sizeof(char *));
+	if(envtab==NULL)return NULL;
+	for(int i=0;i<MAXVARS&&tab[i].str!=NULL;i++){
+		if(tab[i].global==1){
+			envtab[j++]=tab[i].str;
+		}
+	}
+	envtab[j]=NULL;
+	return envtab;
+}
+// VLtable2environ,envtab,
+// VLlist,VLenviron2table,env,newstring,
 // first_blank,len,MAXVARS,tab,str,strncmp,
 // VLlookup,find_item,var,VLstore,global
 // VLstore,name,val,itemp,
