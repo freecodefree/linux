@@ -226,7 +226,36 @@ char *VLlookup(char *name){
 	}
 	return "";
 }
-// VLlookup,find_item,
+
+int VLexport(char *name){
+	int rv=1;
+	struct var *itemp;
+	if((itemp=find_item(name,0))!=NULL){
+		itemp->global=1;
+		rv=0;
+	}else if(VLstore(name,"")==1){
+		rv=VLexport(name);
+	}
+	return rv;
+}
+
+static struct var *find_item(char *name,int first_blank){
+	char *s;
+	int len=strlen(name);
+	int i;	
+
+	for(i=0;i<MAXVARS&&(s=tab[i].str)!=NULL;i++){
+		if(strncmp(s,name,len)==0&&s[len]=='='){
+			return &tab[i];
+		}
+	}
+	if(i<MAXVARS&&first_blank){
+		return &tab[i];
+	}
+	return NULL;
+}
+// first_blank,len,MAXVARS,tab,str,strncmp,
+// VLlookup,find_item,var,VLstore,global
 // VLstore,name,val,itemp,
 // VLtable2environ,execvp 
 // str,cp,strchr,VLstore,isalnum
