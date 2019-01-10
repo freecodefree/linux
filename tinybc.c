@@ -38,5 +38,41 @@ void be_dc(int in[],int out[]){
 	oops("fail to execute dc",2);
 	
 }
-// execlp
+
+void be_bc(int todc[],int fromdc[]){
+	int num1,num2;
+	char operation[BUFSIZ],message[BUFSIZ];
+	FILE *fpout,*fpin;
+
+	close(todc[0]);
+	close(fromdc[1]);
+	
+	fpout=fdopen(todc[1],"w");
+	fpin=fromdc(fromdc[0],"r");
+	if(fpout==NULL||fpin==NULL){
+		fatal("error converint pipes to streams");
+	}
+	
+	while(1){
+		printf("tinybc:");
+		if(fgets(message,BUFSIZ,stdin)==NULL)break;
+
+		if(sscanf(message,"%d%[+-*/^]%d",&num1,operation,&num2)!=3){
+			printf("syntax error\n");
+			continue;
+		}
+
+		if(fprintf(fpout,"%d\n%d\n%c\np\n",num1,num2,*operation)==EOF){
+			fatal("error writing",3);
+		}
+		fflush(fpout);
+
+		if(fgets(message,BUFSIZ,fpin)==NULL)break;
+		printf("%d %c %d = %s\n",num1,*operation,num2,message);
+	}
+	fclose(fpin);
+	fclose(fpout);
+}
+// 
+// execlp,num12,operation,BUFSIZ,message,fgets,fpout,fpin,fdopen
 // pid,todc[2],fromdc,pipe,be_dc,be_bc,wait
