@@ -1,6 +1,12 @@
 #include "stdio.h"
+#include "stdlib.h"
+#include "unistd.h"
 
 #define oops(m,x) {perror(m);exit(x);}
+
+void fatal(char *);
+void be_dc(int*,int *);
+void be_bc(int *,int *);
 
 int main(){
 	int pid,todc[2],fromdc[2];
@@ -48,7 +54,7 @@ void be_bc(int todc[],int fromdc[]){
 	close(fromdc[1]);
 	
 	fpout=fdopen(todc[1],"w");
-	fpin=fromdc(fromdc[0],"r");
+	fpin=fdopen(fromdc[0],"r");
 	if(fpout==NULL||fpin==NULL){
 		fatal("error converint pipes to streams");
 	}
@@ -63,7 +69,7 @@ void be_bc(int todc[],int fromdc[]){
 		}
 
 		if(fprintf(fpout,"%d\n%d\n%c\np\n",num1,num2,*operation)==EOF){
-			fatal("error writing",3);
+			fatal("error writing");
 		}
 		fflush(fpout);
 
@@ -72,6 +78,11 @@ void be_bc(int todc[],int fromdc[]){
 	}
 	fclose(fpin);
 	fclose(fpout);
+}
+
+void fatal(char *s){
+	fprintf(stderr,"Error:%s\n",s);
+	exit(1);
 }
 // 
 // execlp,num12,operation,BUFSIZ,message,fgets,fpout,fpin,fdopen
