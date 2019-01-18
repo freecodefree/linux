@@ -1,3 +1,5 @@
+#ifndef SOCKLIB_C
+#define SOCKLIB_C
 #include "stdio.h"
 #include "unistd.h"
 #include "sys/types.h"
@@ -11,6 +13,7 @@
 
 #define HOSTLEN 256
 #define BACKLOG 1
+
 
 int make_server_socket_q(int,int);
 
@@ -45,9 +48,10 @@ int make_server_socket_q(int portnum,int backlog){
 	return sock_id;
 }
 
+
 int connect_to_server(char *host,int portnum){
 	int sock;
-	struct sockaddr_in,servadd;
+	struct sockaddr_in servadd;
 	struct hostent *hp;
 
 	sock=socket(AF_INET,SOCK_STREAM,0);
@@ -65,5 +69,6 @@ int connect_to_server(char *host,int portnum){
 	}
 	return sock;
 }
+#endif
 // connect_to_server,host,sock,servadd
 // portnum,backlog,sockaddr_in,hostent,saddr,hp,
