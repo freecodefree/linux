@@ -6,10 +6,23 @@
 #include "netdb.h"
 #include "time.h"
 #include "strings.h"
+#include "ctype.h"
+#include "stdlib.h"
 
-#define PORTNUM 15000
+#define PORTNUM 13001
 #define HOSTLEN 256
-#defien oops(msg) {perror(msg);exit(1);}
+#define oops(msg) {perror(msg);exit(1);}
+
+void sanitize(char *str){
+	char *src,*dest;
+
+	for(src=dest=str;*src;src++){
+		if(*src=='/'||isalnum(*src)){
+			*dest++=*src;
+		}
+	}
+	*dest='\0';
+}
 
 int main(int ac,char **av){
 	struct sockaddr_in saddr;
@@ -45,6 +58,7 @@ int main(int ac,char **av){
 		if(sock_fd==-1){
 			oops("accept");
 		}
+		printf("accept\n");
 		sock_fpi=fdopen(sock_fd,"r");
 		if(sock_fpi==NULL){
 			oops("fdopen reading");
@@ -53,6 +67,7 @@ int main(int ac,char **av){
 			oops("fgets");
 		}
 		sanitize(dirname);
+		printf("get dirname:%s\n",dirname);
 		
 		sprintf(command,"ls %s",dirname);
 		if((pipe_fp=popen(command,"r"))==NULL){
@@ -64,8 +79,13 @@ int main(int ac,char **av){
 		}
 
 		while((c=getc(pipe_fp))!=EOF){
+			putc(c,stdout);
 			putc(c,sock_fpo);
 		}
+		putc(c,sock_fpo);
+		write(sock_id,"done\n",5);
+		printf("message sent\n");
+		sleep(2);
 		fclose(sock_fpi);
 		fclose(sock_fpo);
 		pclose(pipe_fp);

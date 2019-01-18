@@ -8,7 +8,7 @@
 #include "unistd.h"
 
 #define oops(msg) {perror(msg);exit(1);}
-#define PORTNUM 1500
+#define PORTNUM 13001
 
 int main(int ac,char **av){
 	struct sockaddr_in servadd;
@@ -18,7 +18,7 @@ int main(int ac,char **av){
 	int n_read;
 
 	if(ac!=3){
-		printf("usage:hostname portnum");
+		printf("usage:hostname path");
 		exit(1);
 	}
 
@@ -38,6 +38,7 @@ int main(int ac,char **av){
 	if(connect(sock_id,(struct sockaddr *)&servadd,sizeof(servadd))!=0){
 		oops("connect");
 	}
+	printf("rls:connect\n");
 
 	if(write(sock_id,av[2],sizeof(av[2]))==-1){
 		oops("write1");
@@ -45,12 +46,15 @@ int main(int ac,char **av){
 	if(write(sock_id,"\n",1)==-1){
                 oops("write2");
         }
+	printf("rls:request sent\n");
 
 	while((n_read=read(sock_id,buffer,BUFSIZ))>0){
+		printf("reading:%s",buffer);
 		if(write(1,buffer,n_read)==-1){
 			oops("write3");
 		}
 	}
+	printf("rls:wrote stdout\n");
 	close(sock_id);
 
 }

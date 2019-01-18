@@ -121,6 +121,39 @@ char **splitline(char *line){
 	*args[argnum]=NULL;
 	return args;
 }
+
+char *newstr(char *s,int l){
+	char *rv;
+	rv=emalloc(l+1);
+	strcpy(rv,s,l);
+	rv[l]='\0';
+	return rv;
+}
+
+void freelist(char **list){
+	char **cp=list;
+	while(*cp){
+		free(*cp++);
+	}
+	free(list);
+}
+
+void *emalloc(size_t n){
+	void *rv;
+	if((rv=malloc(n))==NULL){
+		fatal("no enough space!\n");
+	}
+	return rv;
+}
+
+void *erealloc(char *s,size_t n){
+	void *rv;
+	if((rv=realloc(s,n))==NULL){
+		fatal("not enouth space!\n");
+	}
+	return rv;
+}
+// s,l,rv,list,cp,size_t,fatal,
 // line,newstr,args,spots,bufspace,argnum,cp,start,len,emalloc,sizeof
 // is_delim,erealloc,start
 // nextCmd,buf,bufspace,pos,prompt,FILE,getc,BUFSIZ,emalloc,erealloc
