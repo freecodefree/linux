@@ -62,6 +62,60 @@ void process_rq(char *rq,int fd){
 		do_cat(arg,fd);
 	}
 }
+
+void header(FILE *fp,char *content_type){
+	fprintf(fp,"HTTP/1.0 200 OK\r\n");
+	if(content_type){
+		fprintf(fp,"Content-type:%s\r\n",content_type);
+	}
+}
+
+void cannot_do(int fd){
+	FILE *fp=fdopen(fd,"w");
+	fprintf(fp,"HTTP/1.0 501 Not Implemented\r\n");
+	fprintf(fp,"Content-type: text/plain\r\n");
+	fprintf(fp,"\r\n");
+
+	fprintf(fp,"That command is not yet implemented\r\n");
+	fclose(fp);
+}
+
+void do_404(char *item,int fd){
+	FILE *fp=fdopen(fd,"w");
+
+	fprintf(fp,"HTTP/1.0 404 Not Found\r\n");
+	fprintf(fp,"Content-type: text/plain\r\n");
+	fprintf(fp,"\r\n");
+
+	fprintf(fp,"The item you requested: %s\r\nis not found\r\n",item);
+	fclose(fp);
+}
+
+int isadir(char *f){
+	struct stat info;
+	return (stat(f,&info)!=-1&&S_ISDIR(info.st_mode));
+}
+
+int not_exist(char *f){
+	struct stat info;
+	return (stat(f,&info)!=-1);
+}
+
+void do_ls(char *dir,int fd){
+	FILE *fp=fdopen(fd,"w");
+	header(fp,"test/plain");
+	fprintf(fp,"\r\n");
+	fflush(fp);
+
+	dup2(fd,1);
+	dup2(fd,2);
+	close(fd);
+	execlp("ls","ls","-l",dir,NULL);
+	perror(dir);
+	exit(1);
+}
+// dir,fd,header,text/plain,fflush,dup2
+// stat,info,stat,S_ISDIR,st_mode, 
 // rq,fd,cmd,arg,cannot_do,not_exist,do_404,isadir,do_ls,ends_in_cgi,do_exec
 // do_cat
 // sock,fd,fpin,request,read_til_crnl,process_rq
