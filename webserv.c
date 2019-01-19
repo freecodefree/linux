@@ -114,6 +114,30 @@ void do_ls(char *dir,int fd){
 	perror(dir);
 	exit(1);
 }
+
+char *file_type(char *f){
+	char *cp;
+	if((cp=strchr(f,'.'))!=NULL){
+		return cp+1;
+	}
+	return "";
+}
+int ends_in_cgi(char *f){
+	return (strcmp(file_type(f),"cgi")==0);
+}
+
+do_exec(char *prog,int fd){
+	FIEL *fp=fdopen(fd,"w");
+	header(fp,NULL);
+	fflush(fp);
+
+	dup2(fd,1);
+	dup2(fd,2);
+	close(fd);
+	execl(prog,prog,NULL);
+	perror(prog);
+}
+// file_type,strrchr,prog,execl
 // dir,fd,header,text/plain,fflush,dup2
 // stat,info,stat,S_ISDIR,st_mode, 
 // rq,fd,cmd,arg,cannot_do,not_exist,do_404,isadir,do_ls,ends_in_cgi,do_exec
