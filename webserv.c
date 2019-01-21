@@ -1,7 +1,23 @@
 #include "socklib.c"
 #include "sys/types.h"
 #include "sys/stat.h"
+#include "stdlib.h"
 #include "string.h"
+
+#define t(where,msg,i) {printf(where);printf(msg);printf("%d\n",i);}
+void read_til_crnl(FILE *);
+void process_rq(char *,int);
+void header(FILE *,char *);
+void cannot_do(int);
+void do_404(char *,int);
+int isadir(char *);
+int not_exist(char *);
+void do_ls(char *,int);
+char *file_type(char *f);
+int ends_in_cgi(char *);
+void do_exec(char *,int);
+void do_cat(char *,int);
+
 
 int main(int ac,char **av){
 	int sock,fd;
@@ -27,13 +43,13 @@ int main(int ac,char **av){
 		}
 
 	
-		fpin=fopen(fd,"r");
+		fpin=fdopen(fd,"r");
 		if(fpin==NULL){
 			return 1;
 		}
 
 		fgets(request,BUFSIZ,fpin);
-		printf("get a request:%s",request);
+		printf("get a request:%s\n",request);
 		read_til_crnl(fpin);
 		process_rq(request,fd);
 		fclose(fpin);
@@ -46,10 +62,14 @@ void read_til_crnl(FILE *fp){
 }
 
 void process_rq(char *rq,int fd){
+//	t("process_rq:",NULL,0);
 	char cmd[11],arg[513];
 	if(fork()!=0)return;
-	strcpy(arg,"./");
-	if(scanf(rq,"%10s%512s",cmd,(arg+2))!=2)return;
+	strcpy(arg,".");
+	if(sscanf(rq,"%s%s",cmd,(arg+1))!=2);{
+		printf("dbg:get cmd&arg:%s&%s\n",cmd,arg);
+//		return;
+	}
 	if(strcmp(cmd,"GET")!=0){
 		cannot_do(fd);
 	}else if(not_exist(arg)){
@@ -93,12 +113,17 @@ void do_404(char *item,int fd){
 
 int isadir(char *f){
 	struct stat info;
-	return (stat(f,&info)!=-1&&S_ISDIR(info.st_mode));
+	int a,b;
+	a=stat(f,&info);
+	b=S_ISDIR(info.st_mode);
+	t("isdir:","stat()=",a);
+	t("isdir:","S_ISDIR()",b);
+	return ((a!=-1)&&b);
 }
 
 int not_exist(char *f){
 	struct stat info;
-	return (stat(f,&info)!=-1);
+	return (stat(f,&info)==-1);
 }
 
 void do_ls(char *dir,int fd){
@@ -106,10 +131,12 @@ void do_ls(char *dir,int fd){
 	header(fp,"test/plain");
 	fprintf(fp,"\r\n");
 	fflush(fp);
-
+	
+	t("do_ls:dir=",dir,fd);
 	dup2(fd,1);
 	dup2(fd,2);
 	close(fd);
+	t("do_ls:dir=",dir,fd);
 	execlp("ls","ls","-l",dir,NULL);
 	perror(dir);
 	exit(1);
@@ -126,8 +153,8 @@ int ends_in_cgi(char *f){
 	return (strcmp(file_type(f),"cgi")==0);
 }
 
-do_exec(char *prog,int fd){
-	FIEL *fp=fdopen(fd,"w");
+void do_exec(char *prog,int fd){
+	FILE *fp=fdopen(fd,"w");
 	header(fp,NULL);
 	fflush(fp);
 
@@ -137,6 +164,38 @@ do_exec(char *prog,int fd){
 	execl(prog,prog,NULL);
 	perror(prog);
 }
+
+void do_cat(char *f,int fd){
+	char *extension;
+	char *content="text/plain";
+	int c;
+	FILE *fpsock,*fpfile;
+
+	extension=file_type(f);
+	if(strcmp(extension,"htlm")==0){
+		content="text/html";
+	}else if(strcmp(extension,"gif")==0){
+		content="text/gif";
+	}else if(strcmp(extension,"jpg")==0){
+		content="text/jpg";
+	}
+
+	fpsock=fdopen(fd,"w");
+	fpfile=fopen(f,"r");
+	if(fpsock==NULL||fpfile==NULL){
+		return;
+	}
+	header(fpsock,content);
+	fprintf(fpsock,"\r\n");
+	while((c=getc(fpfile))!=EOF){
+		putc(c,fpsock);
+	}
+	fclose(fpsock);
+	fclose(fpfile);
+	return;
+	
+}
+// extension,content,fpsock,fpfile,
 // file_type,strrchr,prog,execl
 // dir,fd,header,text/plain,fflush,dup2
 // stat,info,stat,S_ISDIR,st_mode, 
