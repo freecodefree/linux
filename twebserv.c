@@ -65,13 +65,14 @@ void *handle_call(void *fdptr){
 
 	void skip_rest_of_header(FILE *);
 	skip_rest_of_header(fpin);
-
+	
+	void process_rq(char *,int);
 	process_rq(request,fd);
 	fclose(fpin);
 }
 void skip_rest_of_header(FILE *fp){
 	char buf[BUFSIZ];
-	while(fgets()!=NULL&&strcmp(buf,"\r\n")!=0);
+	while(fgets(buf,BUFSIZ,fp)!=NULL&&strcmp(buf,"\r\n")!=0);
 }
 
 void process_rq(char *rq,int fd){
@@ -80,9 +81,10 @@ void process_rq(char *rq,int fd){
 	if(sscanf(rq,"%s%s",cmd,arg)!=2){
 		return;
 	}
+	void sanitize(char *);
 	sanitize(arg);
 	printf("sanitize version:%s\n",arg);
-	void not_implemented(void);
+	void not_implemented(int);
 	int built_in(char *,int);
 	int not_exist(char *);
 	void do_404(char *,int);
@@ -90,8 +92,8 @@ void process_rq(char *rq,int fd){
 	void do_ls(char *,int);
 	void do_cat(char *,int);
 	if(strcmp(cmd,"GET")!=0){
-		not_implemented();
-	}else if(built_in(arg));
+		not_implemented(fd);
+	}else if(built_in(arg,fd));
 	else if(not_exist(arg)){
 		do_404(arg,fd);
 	}else if(isadir(arg)){
@@ -116,10 +118,12 @@ void sanitize(char *str){
 	}
 
 	*dst='\0';
+//	printf("%s\n",str);
 	if(*str=='/'){
 		strcpy(str,str+1);
 	}
-	if(*str='\0'||strcmp(str,"./")==0||strcmp(str,"./..")==0){
+//	printf("dbg:%s\n",str);
+	if(*str=='\0'||strcmp(str,"./")==0||strcmp(str,"./..")==0){
 		strcpy(str,".");
 	}
 }
@@ -174,7 +178,7 @@ int not_exist(char *f){
 	return (stat(f,&info)==-1);
 }
 
-do_ls(char *dir,int fd){
+void do_ls(char *dir,int fd){
 	DIR *dirptr;
 	struct dirent *direntp;
 	int bytes=0;
@@ -196,7 +200,7 @@ do_ls(char *dir,int fd){
 }
 char *file_type(char *f){
 	char *cp;
-	if((cp=strrchr(f,"."))!=NULL){
+	if((cp=strrchr(f,'.'))!=NULL){
 		return cp+1;
 	}
 	return "";
@@ -206,7 +210,7 @@ void do_cat(char *f,int fd){
 	char *extension=file_type(f);
 	char *type="text/plain";
 	FILE *fpsock,*fpfile;
-	int c,types=0;
+	int c,bytes=0;
 
 	if(strcmp(extension,"html")==0){
 		type="text/html";
