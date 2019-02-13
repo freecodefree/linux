@@ -1,5 +1,5 @@
 #include "linux/fs.h"
-
+#include "stdio.h"
 struct coms_dev{
 	unsigned int size;
 	int bank_number;
@@ -43,8 +43,32 @@ int __init cmos_init(void){
 		cmos_devp=kmalloc(sizeof(struct cmos_dev),GFP_KERNEL);
 		if(!cmos_devp){
 			printk("Bad kmalloc\n");
+		return 1;
+		}
+		
+		sprintf(cmos_devp->name,"cmos%d",i);
+		if(!(request_region(addrports[i],2,cmos_devp->name))){
+			printk("cmos:I/O port 0x%x is not free.\n",addrports[i]);
+			return -EIO;
+		}
+		cmos_devp->bank_number=i;
+
+		cdev_init(&cmos_devp->cdev,&cmos_fops);
+		cmos_devp->cdev.owner=THIS_MODULE;
+
+		if(cdev_add(&cmos_devp->cdev,(dev_number+i),1)){
+			printk("Bad cdev\n");
 			return 1;
 		}
+
+		class_device_create(cmos_class,NULL,(dev_number+i),NULL,"cmos%d",i);
 	}
+
+	printk("CMOS Driver Initialized.\n");
+	return 0;
 }
 
+void __exit cmos_cleanup(void){
+	int i;
+	cdev_
+}
